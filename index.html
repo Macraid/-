@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國三電學互動實驗室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes flow {
+            from { stroke-dashoffset: 20; }
+            to { stroke-dashoffset: 0; }
+        }
+        .wire-path {
+            stroke-dasharray: 4;
+            animation: flow 1s linear infinite;
+        }
+        .bulb-glow {
+            transition: fill 0.3s, filter 0.3s;
+        }
+        .tab-active {
+            border-bottom: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-6 shadow-lg">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                國三電學互動實驗室
+            </h1>
+            <p class="text-blue-100">探索歐姆定律與電路奧秘</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 md:p-8">
+        <!-- Tab Navigation -->
+        <nav class="flex space-x-4 mb-8 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+            <button onclick="switchTab('ohm')" id="tab-ohm" class="flex-1 py-2 font-semibold transition tab-active">歐姆定律</button>
+            <button onclick="switchTab('circuit')" id="tab-circuit" class="flex-1 py-2 font-semibold transition text-slate-500">串聯與並聯</button>
+            <button onclick="switchTab('power')" id="tab-power" class="flex-1 py-2 font-semibold transition text-slate-500">電功率</button>
+        </nav>
+
+        <!-- Ohm's Law Section -->
+        <section id="sect-ohm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Control Panel -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <h2 class="text-xl font-bold mb-6 text-slate-800">歐姆定律模擬 (V = I × R)</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="flex justify-between mb-2 font-medium text-slate-700">
+                                <span>電壓 (V): <span id="v-val" class="text-blue-600">3.0</span> V</span>
+                            </label>
+                            <input type="range" id="v-slider" min="0" max="12" step="0.5" value="3" class="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer">
+                        </div>
+
+                        <div>
+                            <label class="flex justify-between mb-2 font-medium text-slate-700">
+                                <span>電阻 (R): <span id="r-val" class="text-red-600">10</span> Ω</span>
+                            </label>
+                            <input type="range" id="r-slider" min="1" max="50" step="1" value="10" class="w-full h-2 bg-red-100 rounded-lg appearance-none cursor-pointer">
+                        </div>
+
+                        <div class="mt-8 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                            <p class="text-center text-lg font-bold">
+                                電流 (I) = <span id="i-result" class="text-green-600 text-2xl">0.30</span> A
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Simulation -->
+                <div class="bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center border border-slate-100">
+                    <svg width="240" height="240" viewBox="0 0 200 200">
+                        <!-- Battery -->
+                        <rect x="80" y="160" width="40" height="25" rx="2" fill="#3b82f6" />
+                        <rect x="90" y="155" width="20" height="5" rx="1" fill="#1d4ed8" />
+                        
+                        <!-- Circuit Wires -->
+                        <path id="ohm-wire" class="wire-path" d="M100 155 V 40 H 150 V 80 M 150 120 V 175 H 120" fill="none" stroke="#64748b" stroke-width="3" />
+                        <path d="M100 155 V 40 H 50 V 175 H 80" fill="none" stroke="#64748b" stroke-width="3" />
+
+                        <!-- Bulb -->
+                        <circle cx="150" cy="100" r="20" fill="#e2e8f0" stroke="#475569" stroke-width="2" id="ohm-bulb" class="bulb-glow" />
+                        <path d="M140 115 Q 150 125 160 115" fill="none" stroke="#475569" stroke-width="2" />
+                    </svg>
+                    <div class="mt-4 text-sm text-slate-500 italic">
+                        提示：增加電壓會加快電子流速並提高燈泡亮度；增加電阻則相反。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Circuit Section -->
+        <section id="sect-circuit" class="hidden space-y-6">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p class="text-blue-800"><b>概念回顧：</b> 串聯電路中電流處處相等；並聯電路中各支路電壓相等。</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border-2 hover:border-blue-400 transition cursor-pointer" onclick="alert('串聯特點：一個燈泡壞掉，全電路斷路！')">
+                    <h3 class="font-bold text-lg mb-4">串聯實驗 (Series)</h3>
+                    <svg width="100%" height="150" viewBox="0 0 300 150">
+                        <rect x="130" y="120" width="40" height="20" fill="#3b82f6" />
+                        <path d="M130 130 H 40 V 50 H 260 V 130 H 170" fill="none" stroke="#94a3b8" stroke-width="3" />
+                        <circle cx="100" cy="50" r="15" fill="#fde047" stroke="#854d0e" />
+                        <circle cx="200" cy="50" r="15" fill="#fde047" stroke="#854d0e" />
+                    </svg>
+                    <ul class="text-sm mt-4 space-y-1 text-slate-600">
+                        <li>• 總電阻 = R1 + R2</li>
+                        <li>• 電流 (I) 相同</li>
+                        <li>• 燈泡平分電壓，亮度較暗</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md border-2 hover:border-green-400 transition cursor-pointer" onclick="alert('並聯特點：各燈泡互不影響，家用電路多採此設計！')">
+                    <h3 class="font-bold text-lg mb-4">並聯實驗 (Parallel)</h3>
+                    <svg width="100%" height="150" viewBox="0 0 300 150">
+                        <rect x="130" y="120" width="40" height="20" fill="#22c55e" />
+                        <path d="M130 130 H 40 V 40 H 260 V 130 H 170" fill="none" stroke="#94a3b8" stroke-width="3" />
+                        <path d="M80 40 V 80 H 220 V 40" fill="none" stroke="#94a3b8" stroke-width="3" />
+                        <circle cx="150" cy="40" r="15" fill="#fde047" stroke="#854d0e" />
+                        <circle cx="150" cy="80" r="15" fill="#fde047" stroke="#854d0e" />
+                    </svg>
+                    <ul class="text-sm mt-4 space-y-1 text-slate-600">
+                        <li>• 1/總電阻 = 1/R1 + 1/R2</li>
+                        <li>• 電壓 (V) 相同</li>
+                        <li>• 總電流增加，燈泡亮度維持</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Power Section -->
+        <section id="sect-power" class="hidden space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-md">
+                <h2 class="text-2xl font-bold mb-6 text-center text-slate-800">電功率與能源消耗</h2>
+                <div class="flex flex-col items-center space-y-8">
+                    <div class="flex gap-4 items-center">
+                        <div class="text-right">
+                            <span class="block text-sm text-slate-500">功率 (P)</span>
+                            <span id="p-display" class="text-3xl font-black text-purple-600">0.9</span> <small>瓦特 (W)</small>
+                        </div>
+                        <div class="text-4xl text-slate-300">=</div>
+                        <div class="text-left">
+                            <span class="block text-sm text-slate-500">電壓 × 電流</span>
+                            <span id="vi-display" class="text-xl">3.0V × 0.3A</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full max-w-md p-6 bg-yellow-50 rounded-xl border border-yellow-200">
+                        <h4 class="font-bold text-yellow-800 mb-2">💡 學習小教室：什麼是「度」？</h4>
+                        <p class="text-sm text-yellow-900 leading-relaxed">
+                            電力公司收費是用「能量」計算。1 度電 = 1 仟瓦小時 (kWh)。<br>
+                            意即 1000 瓦特(W)的電器使用 1 小時所消耗的電能。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simple Quiz -->
+        <div class="mt-12 bg-slate-800 text-white p-8 rounded-2xl shadow-xl">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                隨堂小測試
+            </h3>
+            <p class="mb-6 text-slate-300">若電阻固定為 10 Ω，將電壓從 3V 調整到 6V，電流會如何變化？</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button onclick="checkAnswer(false)" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg transition text-left">A. 電流減半 (0.15A)</button>
+                <button onclick="checkAnswer(true)" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg transition text-left">B. 電流加倍 (0.60A)</button>
+                <button onclick="checkAnswer(false)" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg transition text-left">C. 電流不變 (0.30A)</button>
+                <button onclick="checkAnswer(false)" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg transition text-left">D. 電阻會變小</button>
+            </div>
+            <div id="quiz-feedback" class="mt-4 hidden p-3 rounded-lg font-bold"></div>
+        </div>
+    </main>
+
+    <footer class="text-center p-8 text-slate-400 text-sm">
+        &copy; 2025 電學互動教學系統 | 適用於國三自然與生活科技課程
+    </footer>
+
+    <script>
+        const vSlider = document.getElementById('v-slider');
+        const rSlider = document.getElementById('r-slider');
+        const vVal = document.getElementById('v-val');
+        const rVal = document.getElementById('r-val');
+        const iResult = document.getElementById('i-result');
+        const ohmBulb = document.getElementById('ohm-bulb');
+        const ohmWire = document.getElementById('ohm-wire');
+        const pDisplay = document.getElementById('p-display');
+        const viDisplay = document.getElementById('vi-display');
+
+        function updateOhm() {
+            const v = parseFloat(vSlider.value);
+            const r = parseFloat(rSlider.value);
+            const i = v / r;
+            const p = v * i;
+
+            // Update text
+            vVal.innerText = v.toFixed(1);
+            rVal.innerText = r;
+            iResult.innerText = i.toFixed(2);
+            pDisplay.innerText = p.toFixed(2);
+            viDisplay.innerText = `${v.toFixed(1)}V × ${i.toFixed(2)}A`;
+
+            // Update Bulb Visuals
+            const brightness = Math.min((v / 12) * 1.5, 1);
+            const shadow = (v * 2);
+            ohmBulb.style.fill = `rgba(253, 224, 71, ${0.3 + (brightness * 0.7)})`;
+            ohmBulb.style.filter = `drop-shadow(0 0 ${shadow}px rgba(253, 224, 71, 0.8))`;
+
+            // Update Flow Speed
+            // Higher I -> Lower duration
+            const duration = i > 0 ? (0.5 / i) : 0;
+            if (i > 0) {
+                ohmWire.style.animationDuration = `${Math.max(duration, 0.1)}s`;
+                ohmWire.style.display = 'block';
+            } else {
+                ohmWire.style.display = 'none';
+            }
+        }
+
+        function switchTab(tab) {
+            // Hide all sections
+            document.getElementById('sect-ohm').classList.add('hidden');
+            document.getElementById('sect-circuit').classList.add('hidden');
+            document.getElementById('sect-power').classList.add('hidden');
+            
+            // Show target
+            document.getElementById(`sect-${tab}`).classList.remove('hidden');
+
+            // Style tabs
+            ['ohm', 'circuit', 'power'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(t === tab) {
+                    el.classList.add('tab-active');
+                    el.classList.remove('text-slate-500');
+                } else {
+                    el.classList.remove('tab-active');
+                    el.classList.add('text-slate-500');
+                }
+            });
+        }
+
+        function checkAnswer(isCorrect) {
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-green-600', 'bg-red-600');
+            
+            if (isCorrect) {
+                feedback.innerText = "答對了！根據 V=IR，若 R 固定，V 與 I 成正比。";
+                feedback.classList.add('bg-green-600');
+            } else {
+                feedback.innerText = "再試試看！提示：電壓增加，推動電子的力量會變大。";
+                feedback.classList.add('bg-red-600');
+            }
+        }
+
+        vSlider.addEventListener('input', updateOhm);
+        rSlider.addEventListener('input', updateOhm);
+
+        // Initial Call
+        window.onload = updateOhm;
+    </script>
+</body>
+</html>
